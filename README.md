@@ -24,7 +24,7 @@ This is a classic 7x7 Minesweeper game implemented in C for the DE10-Standard FP
 | `KEY[2]`   | Move left           |
 | `KEY[3]`   | Move up             |
 
-### 🔀 Switches (SW[1:0])
+### 🔀 Switches (SW[2:0])
 | Switch     | Function             |
 |------------|----------------------|
 | `SW[0]`    | Move down (edge-detected) |
