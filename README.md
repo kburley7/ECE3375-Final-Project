@@ -29,6 +29,8 @@ This is a classic 7x7 Minesweeper game implemented in C for the DE10-Standard FP
 |------------|----------------------|
 | `SW[0]`    | Move down (edge-detected) |
 | `SW[1]`    | Toggle flag on tile (edge-detected) |
+| `SW[2]`    | Restart the game |
+
 
 ---
 
