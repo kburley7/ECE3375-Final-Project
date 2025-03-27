@@ -3,6 +3,8 @@
 #define PIXEL_BUFFER_BASE 0xC8000000
 #define KEY_BASE 0xFF200050
 #define SW_BASE  0xFF200040
+#define HEX3_HEX0_BASE 0xFF200020
+
 
 #define BOARD_SIZE 7
 #define CELL_SIZE 30
@@ -40,6 +42,28 @@ const char digits[8][7] = {
 void delay(volatile int count) {
     while (count-- > 0) asm volatile("nop");
 }
+
+void update_hex_display(int value) {
+    volatile int* hex_ptr = (int*)HEX3_HEX0_BASE;
+
+    // Display only on HEX0 (rightmost digit)
+    int hex_map[10] = {
+        0x3F, // 0
+        0x06, // 1
+        0x5B, // 2
+        0x4F, // 3
+        0x66, // 4
+        0x6D, // 5
+        0x7D, // 6
+        0x07, // 7
+        0x7F, // 8
+        0x6F  // 9
+    };
+
+    int digit = (value >= 0 && value <= 9) ? hex_map[value] : 0;
+    *hex_ptr = digit;  // Write to HEX0 only
+}
+
 
 void draw_pixel(int x, int y, short color) {
     if (x >= 0 && x < SCREEN_WIDTH && y >= 0 && y < SCREEN_HEIGHT) {
@@ -207,8 +231,18 @@ void game_loop() {
         if (((sw & 0x2) != 0) && ((sw_prev & 0x2) == 0)) {
             if (!revealed[cy][cx]) {
                 flagged[cy][cx] = !flagged[cy][cx];
+        
+                // Count flags and update display
+                int count = 0;
+                for (int y = 0; y < BOARD_SIZE; y++)
+                    for (int x = 0; x < BOARD_SIZE; x++)
+                        if (flagged[y][x]) count++;
+        
+                int flags_remaining = NUM_MINES - count;
+                update_hex_display(flags_remaining);
             }
         }
+        
 
 		// Reset game with SW[2]
 		// Restart game on rising edge of SW[2]
@@ -224,6 +258,7 @@ void game_loop() {
 
     	draw_board(cx, cy);  // Immediately reflect the reset
     	wait_for_key_release(); // optional: makes sure buttons aren't held down
+        update_hex_display(NUM_MINES);
 	}
 
         delay(80000);
@@ -236,8 +271,7 @@ void game_loop() {
 int main() {
     generate_board();
     draw_board(0, 0);
+    update_hex_display(NUM_MINES);
     game_loop();
     return 0;
 }
-	
-	
