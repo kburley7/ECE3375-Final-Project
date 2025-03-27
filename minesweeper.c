@@ -210,9 +210,27 @@ void game_loop() {
             }
         }
 
-        sw_prev = sw;
+		// Reset game with SW[2]
+		// Restart game on rising edge of SW[2]
+		if (((sw & 0x4) != 0) && ((sw_prev & 0x4) == 0)) {
+    		generate_board();
+    		for (int y = 0; y < BOARD_SIZE; y++)
+        		for (int x = 0; x < BOARD_SIZE; x++)
+            	revealed[y][x] = flagged[y][x] = 0;
+
+    	game_over = 0;
+    	cx = 0;
+    	cy = 0;
+
+    	draw_board(cx, cy);  // Immediately reflect the reset
+    	wait_for_key_release(); // optional: makes sure buttons aren't held down
+	}
+
         delay(80000);
+			        sw_prev = sw;
+
     }
+
 }
 
 int main() {
@@ -221,3 +239,5 @@ int main() {
     game_loop();
     return 0;
 }
+	
+	
